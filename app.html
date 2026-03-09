@@ -289,6 +289,8 @@
         }
 
         function submitApp() {
+            sessionStorage.setItem('loanAmount', document.getElementById('inputAmt').value);
+
             // Show loading overlay
             const overlay = document.createElement('div');
             overlay.style.cssText = `

