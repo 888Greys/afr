@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Africell FastLoan</title>
+    <style>
+        :root {
+            --africell-purple: #a60068;
+            --africell-orange: #ff9900;
+            --soft-gray: #f4f7f6;
+            --text-dark: #2d2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: var(--africell-purple);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--soft-gray);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Header Section */
+        .brand-header {
+            background-color: var(--africell-purple);
+            color: white;
+            padding: 30px 20px 60px 20px;
+            text-align: center;
+        }
+
+        .brand-header h1 {
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        /* Card Container */
+        .content-card {
+            background: white;
+            margin: -40px 15px 20px 15px;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+        }
+
+        .step {
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--africell-purple);
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        /* Calculator Styles */
+        .calc-group {
+            margin-bottom: 25px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .amt-display {
+            color: var(--africell-purple);
+            font-size: 18px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            accent-color: var(--africell-purple);
+            cursor: pointer;
+        }
+
+        .summary-box {
+            background: #fff9f0;
+            border: 1px dashed var(--africell-orange);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .repayment-amt {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--africell-orange);
+        }
+
+        /* Form Styles */
+        .form-field {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--africell-purple);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            background: var(--africell-purple);
+            color: white;
+            padding: 18px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="brand-header">
+            <h1>africell <span>FastLoan</span></h1>
+        </div>
+
+        <div class="content-card">
+
+            <div id="step1" class="step active">
+                <h2>Loan Calculator</h2>
+                <p class="subtitle">Check your estimated repayment before you apply.</p>
+
+                <div class="calc-group">
+                    <div class="label-row">
+                        <span>Borrowing Amount</span>
+                        <span class="amt-display" id="valAmt">1,000 GMD</span>
+                    </div>
+                    <input type="range" id="inputAmt" min="500" max="10000" step="500" value="1000">
+                </div>
+
+                <div class="calc-group">
+                    <div class="label-row">
+                        <span>Duration</span>
+                        <span class="amt-display" id="valTime">1 Month</span>
+                    </div>
+                    <input type="range" id="inputTime" min="1" max="6" step="1" value="1">
+                </div>
+
+                <div class="summary-box">
+                    <p style="font-size: 12px;">Estimated Monthly Repayment</p>
+                    <div class="repayment-amt" id="totalRepay">1,050 GMD</div>
+                    <p style="font-size: 10px; color: #888; margin-top: 5px;">*Inclusive of 5% processing fee</p>
+                </div>
+
+                <button class="btn-primary" style="margin-top: 30px;" onclick="showStep(2)">Get This Loan</button>
+            </div>
+
+            <div id="step2" class="step">
+                <h2>Personal Details</h2>
+                <p class="subtitle">Complete your profile to finish the application.</p>
+
+                <div class="form-field">
+                    <label>Purpose of Loan</label>
+                    <select>
+                        <option>Business Expansion</option>
+                        <option>Emergency/Medical</option>
+                        <option>Education</option>
+                        <option>Utility Bills</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label>Employment Status</label>
+                    <select>
+                        <option>Salaried</option>
+                        <option>Self-Employed</option>
+                        <option>Student</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label>Monthly Income (GMD)</label>
+                    <input type="number" placeholder="e.g. 5000">
+                </div>
+
+                <div class="form-field">
+                    <label>Residential Address</label>
+                    <input type="text" placeholder="Street, City">
+                </div>
+
+                <button class="btn-primary" onclick="submitApp()">Submit Application</button>
+                <p style="text-align:center; margin-top:15px; font-size:13px; color:var(--africell-purple); cursor:pointer;"
+                    onclick="showStep(1)">Modify Amount</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const inputAmt = document.getElementById('inputAmt');
+        const inputTime = document.getElementById('inputTime');
+        const valAmt = document.getElementById('valAmt');
+        const valTime = document.getElementById('valTime');
+        const totalRepay = document.getElementById('totalRepay');
+
+        function updateCalc() {
+            const amt = parseInt(inputAmt.value);
+            const time = parseInt(inputTime.value);
+
+            valAmt.innerText = amt.toLocaleString() + " GMD";
+            valTime.innerText = time + (time === 1 ? " Month" : " Months");
+
+            // Logic: 5% flat fee + Principal divided by months
+            const interest = amt * 0.05;
+            const monthly = (amt + interest) / time;
+
+            totalRepay.innerText = Math.round(monthly).toLocaleString() + " GMD";
+        }
+
+        inputAmt.oninput = updateCalc;
+        inputTime.oninput = updateCalc;
+
+        function showStep(s) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + s).classList.add('active');
+        }
+
+        function submitApp() {
+            // Show loading overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed; inset: 0; z-index: 999;
+                background: rgba(166, 0, 104, 0.95);
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                color: white;
+            `;
+            overlay.innerHTML = `
+                <div style="
+                    width: 52px; height: 52px; border: 5px solid rgba(255,255,255,0.3);
+                    border-top-color: white; border-radius: 50%;
+                    animation: spin 0.9s linear infinite; margin-bottom: 24px;
+                "></div>
+                <div style="font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">Submitting Application...</div>
+                <div style="font-size: 13px; opacity: 0.75; margin-top: 8px;">Please wait</div>
+                <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+            `;
+            document.body.appendChild(overlay);
+            setTimeout(() => { window.location.href = "2.html"; }, 3000);
+        }
+    </script>
+
+</body>
+
+</html>

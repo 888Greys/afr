@@ -1,0 +1,8 @@
+{
+  "name": "africell-fastloan",
+  "version": "1.0.0",
+  "description": "Africell FastLoan app with Telegram approval flow",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

