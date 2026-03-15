@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Africell Splash Screen</title>
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body,
+        html {
+            height: 100%;
+            overflow: hidden;
+            /* Africell Corporate Purple Gradient */
+            background: linear-gradient(180deg, #a60068 0%, #7a004d 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+
+        /* Background Pattern Overlays (Simplified using pseudo-elements) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: -50px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 2px, transparent 0);
+            background-size: 20px 20px;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+
+        /* Branding Section */
+        .splash-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .logo {
+            font-size: 4.5rem;
+            font-weight: 900;
+            letter-spacing: -3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo span {
+            color: #ffffff;
+        }
+
+        /* The Orange Signal Icon over the 'i' */
+        .signal-icon {
+            color: #ff9900;
+            font-size: 2rem;
+            position: relative;
+            top: -20px;
+            left: -5px;
+        }
+
+        .version {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Footer Branding */
+        .footer {
+            position: absolute;
+            bottom: 40px;
+            text-align: center;
+            width: 100%;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            opacity: 0.8;
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 1.2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="splash-content fade-in">
+        <div class="logo">
+            <span>africell</span>
+            <span class="signal-icon">📶</span>
+        </div>
+        <div class="version">Version 1.5.9</div>
+    </div>
+
+    <div class="footer fade-in">
+        <p>Africell © All Rights Reserved</p>
+        <p>Powered by TEDMOB.COM</p>
+    </div>
+
+    <script>
+        // Redirect to Login page after 3.5 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                window.location.href = "app.html";
+            }, 3500);
+        });
+    </script>
+
+</body>
+
+</html>

